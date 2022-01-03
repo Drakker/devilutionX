@@ -1721,7 +1721,7 @@ void SaveHotkeys()
 	const size_t nHotkeyTypes = sizeof(myPlayer._pSplHotKey) / sizeof(myPlayer._pSplHotKey[0]);
 	const size_t nHotkeySpells = sizeof(myPlayer._pSplTHotKey) / sizeof(myPlayer._pSplTHotKey[0]);
 
-	SaveHelper file("hotkeys", (nHotkeyTypes * nHotkeySpells) + nHotkeySpells + nHotkeySpells + 1);
+	SaveHelper file("hotkeys", 1 + (nHotkeyTypes * 4) + nHotkeySpells + 4 + 1);
 
 	// Write the number of spell hotkeys
 	file.WriteLE<uint8_t>(static_cast<uint8_t>(nHotkeySpells));
