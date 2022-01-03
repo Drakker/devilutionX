@@ -231,8 +231,8 @@ struct Player {
 	uint64_t _pAblSpells;  // Bitmask of abilities
 	uint64_t _pScrlSpells; // Bitmask of spells available via scrolls
 	uint8_t _pSpellFlags;
-	spell_id _pSplHotKey[4];
-	spell_type _pSplTHotKey[4];
+	spell_id _pSplHotKey[16];
+	spell_type _pSplTHotKey[16];
 	bool _pBlockFlag;
 	bool _pInvincible;
 	int8_t _pLightRad;
