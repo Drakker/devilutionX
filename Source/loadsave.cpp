@@ -363,11 +363,13 @@ void LoadPlayer(LoadHelper &file, Player &player)
 	player._pSpellFlags = file.NextLE<uint8_t>();
 	file.Skip(3); // Alignment
 
-	for (auto &spell : player._pSplHotKey)
-		spell = static_cast<spell_id>(file.NextLE<int32_t>());
-
-	for (auto &spellType : player._pSplTHotKey)
-		spellType = static_cast<spell_type>(file.NextLE<int8_t>());
+	// Extra hotkeys: to keep single player save compatibility, read only 4 hotkeys here, rely on LoadHotkeys for the rest
+	for (uint8_t i = 0; i < 4; i++) {
+		player._pSplHotKey[i] = static_cast<spell_id>(file.NextLE<int32_t>());
+	}
+	for (uint8_t i = 0; i < 4; i++) {
+		player._pSplTHotKey[i] = static_cast<spell_type>(file.NextLE<int8_t>());
+	}
 
 	file.Skip<int32_t>(); // Skip _pwtype
 	player._pBlockFlag = file.NextBool8();
@@ -1091,11 +1093,13 @@ void SavePlayer(SaveHelper &file, const Player &player)
 	file.WriteLE<uint8_t>(player._pSpellFlags);
 	file.Skip(3); // Alignment
 
-	for (auto &spellId : player._pSplHotKey)
-		file.WriteLE<int32_t>(spellId);
-
-	for (auto &spellType : player._pSplTHotKey)
-		file.WriteLE<int8_t>(spellType);
+	// Extra hotkeys: to keep single player save compatibility, write only 4 hotkeys here, rely on SaveHotkeys for the rest
+	for (uint8_t i = 0; i < 4; i++) {
+		file.WriteLE<int32_t>(player._pSplHotKey[i]);
+	}
+	for (uint8_t i = 0; i < 4; i++) {
+		file.WriteLE<int8_t>(player._pSplTHotKey[i]);
+	}
 
 	file.WriteLE<int32_t>(player.UsesRangedWeapon() ? 1 : 0);
 	file.WriteLE<uint8_t>(player._pBlockFlag ? 1 : 0);
@@ -1685,11 +1689,26 @@ void LoadHotkeys()
 
 	auto &myPlayer = Players[MyPlayerId];
 
-	for (auto &spellId : myPlayer._pSplHotKey) {
-		spellId = static_cast<spell_id>(file.NextLE<int32_t>());
+	const size_t nHotkeyTypes = sizeof(myPlayer._pSplHotKey) / sizeof(myPlayer._pSplHotKey[0]);
+	const size_t nHotkeySpells = sizeof(myPlayer._pSplTHotKey) / sizeof(myPlayer._pSplTHotKey[0]);
+
+	// Read the number of spell hotkeys
+	uint8_t nHotkeys = file.NextLE<uint8_t>();
+
+	// Read all hotkeys in the file
+	for (uint8_t i = 0; i < nHotkeys; i++) {
+		// Do not load hotkeys past the size of the spell types array, discard the rest
+		if (i < nHotkeyTypes) {
+			myPlayer._pSplHotKey[i] = static_cast<spell_id>(file.NextLE<int32_t>());
+		}
+		else { file.NextLE<int8_t>(); }
 	}
-	for (auto &spellType : myPlayer._pSplTHotKey) {
-		spellType = static_cast<spell_type>(file.NextLE<int8_t>());
+	for (uint8_t i = 0; i < nHotkeys; i++) {
+		// Do not load hotkeys past the size of the spells array, discard the rest
+		if (i < nHotkeySpells) {
+			myPlayer._pSplTHotKey[i] = static_cast<spell_type>(file.NextLE<int8_t>());
+		}
+		else { file.NextLE<int8_t>(); }
 	}
 	myPlayer._pRSpell = static_cast<spell_id>(file.NextLE<int32_t>());
 	myPlayer._pRSplType = static_cast<spell_type>(file.NextLE<int8_t>());
@@ -1702,7 +1721,10 @@ void SaveHotkeys()
 	const size_t nHotkeyTypes = sizeof(myPlayer._pSplHotKey) / sizeof(myPlayer._pSplHotKey[0]);
 	const size_t nHotkeySpells = sizeof(myPlayer._pSplTHotKey) / sizeof(myPlayer._pSplTHotKey[0]);
 
-	SaveHelper file("hotkeys", (nHotkeyTypes * 4) + nHotkeySpells + 4 + 1);
+	SaveHelper file("hotkeys", (nHotkeyTypes * nHotkeySpells) + nHotkeySpells + nHotkeySpells + 1);
+
+	// Write the number of spell hotkeys
+	file.WriteLE<uint8_t>(static_cast<uint8_t>(nHotkeySpells));
 
 	for (auto &spellId : myPlayer._pSplHotKey) {
 		file.WriteLE<int32_t>(spellId);
