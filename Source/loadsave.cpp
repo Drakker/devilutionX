@@ -1682,9 +1682,9 @@ bool IsHeaderValid(uint32_t magicNumber)
 }
 
 // Returns the size of the hotkeys file with the number of hotkeys passed and if a header with the number of hotkeys is present in the file
-size_t HotkeysSize(size_t nHotkeys = NUM_HOTKEYS, bool header = 1)
+size_t HotkeysSize(size_t nHotkeys = NumHotkeys)
 {
-	return (sizeof(uint8_t) * header) + (nHotkeys * sizeof(int32_t)) + (nHotkeys * sizeof(int8_t) + sizeof(int32_t) + sizeof(int8_t));
+	return sizeof(uint8_t) + (nHotkeys * sizeof(int32_t)) + (nHotkeys * sizeof(int8_t) + sizeof(int32_t) + sizeof(int8_t));
 }
 
 void LoadHotkeys()
@@ -1692,19 +1692,21 @@ void LoadHotkeys()
 	LoadHelper file("hotkeys");
 
 	auto &myPlayer = Players[MyPlayerId];
-	size_t nHotkeys = 4;
+	size_t nHotkeys = 4; // Defaults to old save format number
 
-	// Checking if the save file has the old format with only 4 hotkeys
-	if (!file.IsValid(HotkeysSize(4, 0))) {
-		// If it doesn't match exactly the size expected for 4 hotkeys, assume we have a new style format
-		// and read the number of hotkeys from the beginning of the file 
+	// Refill the spell array with no selection
+	std::fill(myPlayer._pSplHotKey, myPlayer._pSplHotKey + NumHotkeys, SPL_INVALID);
+
+	// Checking if the save file has the old format with only 4 hotkeys and no header
+	if (file.IsValid(HotkeysSize(nHotkeys))) {
+		// The file contains a header byte and and at least 4 entries, so we can assume it's a new format save
 		nHotkeys = file.NextLE<uint8_t>();
 	}
 
 	// Read all hotkeys in the file
 	for (size_t i = 0; i < nHotkeys; i++) {
 		// Do not load hotkeys past the size of the spell types array, discard the rest
-		if (i < NUM_HOTKEYS) {
+		if (i < NumHotkeys) {
 			myPlayer._pSplHotKey[i] = static_cast<spell_id>(file.NextLE<int32_t>());
 		} else {
 			file.Skip<int8_t>();
@@ -1712,7 +1714,7 @@ void LoadHotkeys()
 	}
 	for (size_t i = 0; i < nHotkeys; i++) {
 		// Do not load hotkeys past the size of the spells array, discard the rest
-		if (i < NUM_HOTKEYS) {
+		if (i < NumHotkeys) {
 			myPlayer._pSplTHotKey[i] = static_cast<spell_type>(file.NextLE<int8_t>());
 		} else {
 			file.Skip<int8_t>();
@@ -1731,7 +1733,7 @@ void SaveHotkeys()
 	SaveHelper file("hotkeys", HotkeysSize());
 
 	// Write the number of spell hotkeys
-	file.WriteLE<uint8_t>(static_cast<uint8_t>(NUM_HOTKEYS));
+	file.WriteLE<uint8_t>(static_cast<uint8_t>(NumHotkeys));
 
 	// Write the spell hotkeys
 	for (auto &spellId : myPlayer._pSplHotKey) {

@@ -2458,7 +2458,7 @@ void CreatePlayer(int playerId, HeroClass c)
 	}
 
 	// Initializing the hotkey bindings to no selection
-	std::fill(player._pSplHotKey, player._pSplHotKey + NUM_HOTKEYS, SPL_INVALID);
+	std::fill(player._pSplHotKey, player._pSplHotKey + NumHotkeys, SPL_INVALID);
 
 	PlayerWeaponGraphic animWeaponId = PlayerWeaponGraphic::Unarmed;
 	switch (c) {

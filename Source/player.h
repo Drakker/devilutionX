@@ -33,7 +33,7 @@ namespace devilution {
 #define MAX_SPELL_LEVEL 15
 #define PLR_NAME_LEN 32
 
-static constexpr uint8_t NUM_HOTKEYS = 16;
+static constexpr uint8_t NumHotkeys = 16;
 constexpr int BaseHitChance = 50;
 
 /** Walking directions */
@@ -232,8 +232,8 @@ struct Player {
 	uint64_t _pAblSpells;  // Bitmask of abilities
 	uint64_t _pScrlSpells; // Bitmask of spells available via scrolls
 	uint8_t _pSpellFlags;
-	spell_id _pSplHotKey[NUM_HOTKEYS];
-	spell_type _pSplTHotKey[NUM_HOTKEYS];
+	spell_id _pSplHotKey[NumHotkeys];
+	spell_type _pSplTHotKey[NumHotkeys];
 	bool _pBlockFlag;
 	bool _pInvincible;
 	int8_t _pLightRad;
