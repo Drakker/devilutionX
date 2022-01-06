@@ -1391,7 +1391,7 @@ void InitKeymapActions()
 	    DVL_VK_F1,
 	    HelpKeyPressed,
 	    [&]() { return !IsPlayerDead(); });
-	for (int i = 0; i < NUM_HOTKEYS; ++i) {
+	for (int i = 0; i < NumHotkeys; ++i) {
 		sgOptions.Keymapper.AddAction(
 		    "QuickSpell{}",
 		    N_("Quick spell {}"),
