@@ -1682,8 +1682,9 @@ bool IsHeaderValid(uint32_t magicNumber)
 }
 
 // Returns the size of the hotkeys file with the number of hotkeys passed and if a header with the number of hotkeys is present in the file
-size_t HotkeysSize(size_t nHotkeys=NUM_HOTKEYS, bool header=1) {
-	return (sizeof(uint8_t)*header) + (nHotkeys * sizeof(int32_t)) + (nHotkeys * sizeof(int8_t) + sizeof(int32_t) + sizeof(int8_t));
+size_t HotkeysSize(size_t nHotkeys = NUM_HOTKEYS, bool header = 1)
+{
+	return (sizeof(uint8_t) * header) + (nHotkeys * sizeof(int32_t)) + (nHotkeys * sizeof(int8_t) + sizeof(int32_t) + sizeof(int8_t));
 }
 
 void LoadHotkeys()
@@ -1694,8 +1695,9 @@ void LoadHotkeys()
 	size_t nHotkeys = 4;
 
 	// Checking if the save file has the old format with only 4 hotkeys
-	if (!file.IsValid(HotkeysSize(4,0))) {
-		// If it doesn't match exactly the size expected for 4 hotkeys, assume we have a new style format and read the number of hotkeys from the beginning of the file 
+	if (!file.IsValid(HotkeysSize(4, 0))) {
+		// If it doesn't match exactly the size expected for 4 hotkeys, assume we have a new style format
+		// and read the number of hotkeys from the beginning of the file 
 		nHotkeys = file.NextLE<uint8_t>();
 	}
 
@@ -1712,7 +1714,7 @@ void LoadHotkeys()
 		// Do not load hotkeys past the size of the spells array, discard the rest
 		if (i < NUM_HOTKEYS) {
 			myPlayer._pSplTHotKey[i] = static_cast<spell_type>(file.NextLE<int8_t>());
-		} else { 
+		} else {
 			file.Skip<int8_t>();
 		}
 	}
