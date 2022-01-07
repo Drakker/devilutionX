@@ -1684,18 +1684,22 @@ bool IsHeaderValid(uint32_t magicNumber)
 // Returns the size of the hotkeys file with the number of hotkeys passed and if a header with the number of hotkeys is present in the file
 size_t HotkeysSize(size_t nHotkeys = NumHotkeys)
 {
-	return sizeof(uint8_t) + (nHotkeys * sizeof(int32_t)) + (nHotkeys * sizeof(int8_t) + sizeof(int32_t) + sizeof(int8_t));
+	//         header                  spells                      spell types              active spell    active spell type
+	return sizeof(uint8_t) + (nHotkeys * sizeof(int32_t)) + (nHotkeys * sizeof(uint8_t)) + sizeof(int32_t) + sizeof(uint8_t);
 }
 
 void LoadHotkeys()
 {
 	LoadHelper file("hotkeys");
+	if (!file.IsValid())
+		return;
 
 	auto &myPlayer = Players[MyPlayerId];
 	size_t nHotkeys = 4; // Defaults to old save format number
 
-	// Refill the spell array with no selection
+	// Refill the spell arrays with no selection
 	std::fill(myPlayer._pSplHotKey, myPlayer._pSplHotKey + NumHotkeys, SPL_INVALID);
+	std::fill(myPlayer._pSplTHotKey, myPlayer._pSplTHotKey + NumHotkeys, RSPLTYPE_INVALID);
 
 	// Checking if the save file has the old format with only 4 hotkeys and no header
 	if (file.IsValid(HotkeysSize(nHotkeys))) {
@@ -1709,21 +1713,21 @@ void LoadHotkeys()
 		if (i < NumHotkeys) {
 			myPlayer._pSplHotKey[i] = static_cast<spell_id>(file.NextLE<int32_t>());
 		} else {
-			file.Skip<int8_t>();
+			file.Skip<int32_t>();
 		}
 	}
 	for (size_t i = 0; i < nHotkeys; i++) {
 		// Do not load hotkeys past the size of the spells array, discard the rest
 		if (i < NumHotkeys) {
-			myPlayer._pSplTHotKey[i] = static_cast<spell_type>(file.NextLE<int8_t>());
+			myPlayer._pSplTHotKey[i] = static_cast<spell_type>(file.NextLE<uint8_t>());
 		} else {
-			file.Skip<int8_t>();
+			file.Skip<uint8_t>();
 		}
 	}
 
 	// Load the selected spell last
 	myPlayer._pRSpell = static_cast<spell_id>(file.NextLE<int32_t>());
-	myPlayer._pRSplType = static_cast<spell_type>(file.NextLE<int8_t>());
+	myPlayer._pRSplType = static_cast<spell_type>(file.NextLE<uint8_t>());
 }
 
 void SaveHotkeys()
