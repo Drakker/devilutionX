@@ -1399,7 +1399,7 @@ void InitKeymapActions()
 		    [&]() { return !IsPlayerDead(); },
 		    i + 1);
 	}
-	for (int i = 0; i < NumHotKeys; ++i) {
+	for (int i = 0; i < NumHotkeys; ++i) {
 		sgOptions.Keymapper.AddAction(
 		    "QuickSpell{}",
 		    N_("Quick spell {}"),
