@@ -33,7 +33,7 @@ namespace devilution {
 #define MAX_SPELL_LEVEL 15
 #define PLR_NAME_LEN 32
 
-static constexpr uint8_t NumHotkeys = 16;
+static constexpr size_t NumHotkeys = 16;
 constexpr int BaseHitChance = 50;
 
 /** Walking directions */
