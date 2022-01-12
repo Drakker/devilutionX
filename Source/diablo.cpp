@@ -1404,7 +1404,7 @@ void InitKeymapActions()
 		    "QuickSpell{}",
 		    N_("Quick spell {}"),
 		    N_("Hotkey for skill or spell."),
-		    DVL_VK_F5 + i,
+				i < 4 ? DVL_VK_F5 + i : DVL_VK_INVALID,
 		    [i]() {
 			    if (spselflag) {
 				    SetSpeedSpell(i);
